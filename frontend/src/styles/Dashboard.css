@@ -1,0 +1,98 @@
+/* ============================================
+   Dashboard Layout
+   ============================================ */
+
+.dashboard {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 60px 24px 80px;
+}
+
+/* ---------- Header ---------- */
+.dashboard__header {
+  text-align: center;
+  margin-bottom: 56px;
+  animation: fadeInUp 0.6s ease;
+}
+
+.dashboard__icon {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-md);
+  background: var(--gradient-header);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  box-shadow: 0 4px 16px rgba(129, 140, 248, 0.3);
+}
+
+.dashboard__icon svg {
+  width: 28px;
+  height: 28px;
+  color: white;
+}
+
+.dashboard__title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.5px;
+  margin-bottom: 10px;
+  line-height: 1.2;
+}
+
+.dashboard__subtitle {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  font-weight: 400;
+  max-width: 460px;
+  margin: 0 auto;
+}
+
+/* ---------- Gradient bar under header ---------- */
+.dashboard__gradient-bar {
+  width: 100%;
+  max-width: 920px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--gradient-header);
+  margin-bottom: 48px;
+  opacity: 0.5;
+  animation: fadeIn 0.8s ease 0.3s both;
+}
+
+/* ---------- Cards Grid ---------- */
+.dashboard__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  width: 100%;
+  max-width: 920px;
+  animation: fadeInUp 0.7s ease 0.2s both;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 960px) {
+  .dashboard__grid {
+    grid-template-columns: repeat(2, 1fr);
+    max-width: 500px;
+  }
+}
+
+@media (max-width: 560px) {
+  .dashboard {
+    padding: 40px 16px 80px;
+  }
+
+  .dashboard__title {
+    font-size: 1.5rem;
+  }
+
+  .dashboard__grid {
+    grid-template-columns: 1fr;
+    max-width: 320px;
+  }
+}

@@ -1,0 +1,313 @@
+/* ============================================
+   Prompt SQL Injection Form Styles
+   ============================================ */
+
+.prompt-inj-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  background: var(--bg-surface);
+  border-radius: var(--radius-lg);
+  padding: 4px;
+}
+
+.prompt-inj-form__header h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+.prompt-inj-form__header p {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.prompt-inj-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.prompt-inj-form__label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.prompt-inj-form__label svg {
+  color: #ea580c;
+}
+
+.req-star {
+  color: #ef4444;
+  margin-left: 2px;
+}
+
+.prompt-inj-form__hint {
+  font-size: 0.78rem;
+  color: var(--text-tertiary);
+  margin-bottom: 4px;
+}
+
+/* ---------- Dropzone ---------- */
+.prompt-inj-dropzone {
+  border: 2px dashed var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 24px 16px;
+  background: var(--bg-primary);
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  position: relative;
+}
+
+.prompt-inj-dropzone:hover,
+.prompt-inj-dropzone--active {
+  border-color: #ea580c;
+  background: rgba(234, 88, 12, 0.04);
+}
+
+.prompt-inj-dropzone--has-file {
+  padding: 16px;
+  border-style: solid;
+  border-color: #ea580c;
+  background: rgba(234, 88, 12, 0.03);
+}
+
+.prompt-inj-dropzone__placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.prompt-inj-dropzone__placeholder svg {
+  color: #ea580c;
+  opacity: 0.85;
+}
+
+.prompt-inj-dropzone__text {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+}
+
+.prompt-inj-dropzone__text span {
+  color: #ea580c;
+  font-weight: 500;
+  text-decoration: underline;
+}
+
+.prompt-inj-dropzone__formats {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+}
+
+/* ---------- File Badge ---------- */
+.prompt-inj-file-badge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  text-align: left;
+}
+
+.prompt-inj-file-badge__icon {
+  color: #ea580c;
+  display: flex;
+  align-items: center;
+}
+
+.prompt-inj-file-badge__info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.prompt-inj-file-badge__name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.prompt-inj-file-badge__size {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+}
+
+.prompt-inj-file-badge__remove {
+  background: transparent;
+  border: none;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color var(--transition-fast);
+}
+
+.prompt-inj-file-badge__remove:hover {
+  color: #ef4444;
+}
+
+/* ---------- Attached Files List ---------- */
+.prompt-inj-file-list {
+  margin-top: 8px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+}
+
+.prompt-inj-file-list__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  color: #ea580c;
+  font-size: 0.75rem;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.prompt-inj-file-list__items {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.prompt-inj-file-list__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: var(--text-primary);
+  background: var(--bg-surface);
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.prompt-inj-file-list__item .file-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 250px;
+}
+
+.prompt-inj-file-list__item .file-size {
+  font-size: 0.72rem;
+  color: var(--text-tertiary);
+}
+
+.prompt-inj-file-list__item button {
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.prompt-inj-file-list__more {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  font-style: italic;
+  margin-top: 4px;
+}
+
+/* ---------- Rows Selector ---------- */
+.prompt-inj-rows-picker {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 4px;
+}
+
+.prompt-inj-rows-input {
+  width: 90px;
+  padding: 8px 12px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  background: var(--bg-primary);
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+.prompt-inj-rows-input:focus {
+  border-color: #ea580c;
+}
+
+.prompt-inj-rows-presets {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.prompt-inj-preset-chip {
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-light);
+  background: var(--bg-primary);
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.prompt-inj-preset-chip:hover {
+  border-color: #ea580c;
+  color: #ea580c;
+}
+
+.prompt-inj-preset-chip--active {
+  background: #ea580c;
+  color: #ffffff;
+  border-color: #ea580c;
+}
+
+/* ---------- Actions ---------- */
+.prompt-inj-form__actions {
+  margin-top: 12px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.prompt-inj-submit-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 28px;
+  font-size: 0.92rem;
+  background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+  border: none;
+  box-shadow: 0 4px 14px rgba(234, 88, 12, 0.35);
+}
+
+.prompt-inj-submit-btn:hover {
+  box-shadow: 0 6px 20px rgba(234, 88, 12, 0.45);
+}
