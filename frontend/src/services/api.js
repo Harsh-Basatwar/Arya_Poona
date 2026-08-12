@@ -93,6 +93,87 @@ export async function downloadReportExcel(reportId) {
   window.URL.revokeObjectURL(url);
 }
 
+// ---------- Vulnerability Discovery API ----------
+
+export async function generateVulnerabilityReport(formData) {
+  const res = await api.post(`/vulnerability-discovery/generate`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+  return res.data;
+}
+
+export async function generateVulnerabilityReportStream(formData, onProgress) {
+  try {
+    const response = await fetch('/api/vulnerability-discovery/generate-stream', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok || !response.body) {
+      throw new Error(`HTTP error ${response.status}`);
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder('utf-8');
+    let buffer = '';
+    let finalResult = null;
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const parts = buffer.split('\n\n');
+      buffer = parts.pop() || '';
+
+      for (const part of parts) {
+        const line = part.trim();
+        if (line.startsWith('data: ')) {
+          try {
+            const jsonStr = line.slice(6);
+            const msg = JSON.parse(jsonStr);
+            if (msg.type === 'progress' && onProgress) {
+              onProgress(msg.data);
+            } else if (msg.type === 'result') {
+              finalResult = msg.data;
+            } else if (msg.type === 'error') {
+              throw new Error(msg.error);
+            }
+          } catch (e) {
+            console.warn('Error parsing SSE event:', e);
+          }
+        }
+      }
+    }
+
+    if (finalResult) return finalResult;
+    throw new Error('No result received from stream');
+  } catch (err) {
+    console.warn('Streaming failed, falling back to standard generate:', err);
+    return await generateVulnerabilityReport(formData);
+  }
+}
+
+export async function downloadVulnerabilityExcel(reportId) {
+  const res = await api.get(`/vulnerability-discovery/download-excel/${reportId}`, {
+    responseType: 'blob',
+  });
+  const url = window.URL.createObjectURL(
+    new Blob([res.data], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    })
+  );
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `vulnerabilities_UFO_${reportId}.xlsx`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.URL.revokeObjectURL(url);
+}
+
 // ---------- Reports ----------
 
 export async function getReports(filters = {}) {

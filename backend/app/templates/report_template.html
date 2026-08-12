@@ -481,38 +481,47 @@
     </table>
 
     {% elif feature_type == 'vulnerability-discovery' %}
-    <table class="report-table">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Vulnerability</th>
-          <th>Component</th>
-          <th>CVSS</th>
-          <th>Type</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for v in data.vulnerabilities %}
-        <tr>
-          <td>{{ v.id }}</td>
-          <td><strong>{{ v.name }}</strong></td>
-          <td>{{ v.component }}</td>
-          <td>
-            <span class="badge badge--{{ risk_level(v.cvss_score)|lower }}">
-              {{ v.cvss_score }}
-            </span>
-          </td>
-          <td>{{ v.type }}</td>
-          <td>
-            <span class="badge badge--{{ v.status|lower|replace(' ', '-') }}">
-              {{ v.status }}
-            </span>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+    {% if not data.vulnerabilities %}
+    <div style="padding: 20px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; color: #16a34a; text-align: center;">
+      ✓ No security vulnerabilities were detected in the scanned codebase files.
+    </div>
+    {% else %}
+    {% for v in data.vulnerabilities %}
+    <div class="test-card open">
+      <div class="test-card__header" onclick="this.parentElement.classList.toggle('open')">
+        <span class="test-card__id">{{ v.id }}</span>
+        <span className="test-card__prompt" style="font-weight: 600; color: #1e293b;">
+          {{ v.vulnerability or v.name }}
+        </span>
+        <code style="font-size: 0.75rem; background: #e2e8f0; padding: 2px 8px; border-radius: 4px; color: #334155;">
+          {{ v.file }}:{{ v.line }}
+        </code>
+        <span class="badge badge--{{ (v.severity or 'medium')|lower }}">
+          {{ v.severity or 'Medium' }}
+        </span>
+        <span class="test-card__toggle">▼ Details</span>
+      </div>
+      <div class="test-card__body">
+        {% if v.code %}
+        <div class="test-card__field">
+          <span class="test-card__field-label">Vulnerable Code Snippet</span>
+          <div class="test-card__request-body" style="background: #0f172a; color: #f8fafc; font-family: monospace;">{{ v.code }}</div>
+        </div>
+        {% endif %}
+        <div class="test-card__row">
+          <div class="test-card__field">
+            <span class="test-card__field-label">Description</span>
+            <div class="test-card__response-box">{{ v.description }}</div>
+          </div>
+          <div class="test-card__field">
+            <span class="test-card__field-label">Recommendation / Remediation</span>
+            <div class="test-card__response-box" style="border-left: 3px solid #16a34a; background: #f0fdf4;">{{ v.recommendation }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+    {% endif %}
 
     {% elif feature_type == 'prompt-sql-injection' %}
     <!-- Card-based Layout for Prompt SQL Injection -->
@@ -607,30 +616,30 @@
   </div>
   {% endif %}
 
-  {% if feature_type == 'prompt-sql-injection' and data.token_usage %}
+  {% if (feature_type == 'prompt-sql-injection' or feature_type == 'vulnerability-discovery') and data.token_usage %}
   <!-- Token Usage Analytics & LLM Monitoring -->
   <div class="report-section">
     <div class="token-section">
       <h3>⚡ LLM Token & Performance Telemetry</h3>
       <div class="token-cards" style="grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); margin-bottom: 16px;">
         <div class="token-card">
-          <div class="token-card__value">{{ data.token_usage.total_tokens | default(0) }}</div>
+          <div class="token-card__value">{{ data.token_usage.total_tokens or data.token_usage.total_prompt_tokens + data.token_usage.total_completion_tokens or 0 }}</div>
           <div class="token-card__label">Total Tokens</div>
         </div>
         <div class="token-card">
-          <div class="token-card__value">{{ data.token_usage.prompt_tokens | default(0) }}</div>
+          <div class="token-card__value">{{ data.token_usage.total_prompt_tokens or data.token_usage.prompt_tokens or 0 }}</div>
           <div class="token-card__label">Prompt Tokens</div>
         </div>
         <div class="token-card">
-          <div class="token-card__value">{{ data.token_usage.completion_tokens | default(0) }}</div>
+          <div class="token-card__value">{{ data.token_usage.total_completion_tokens or data.token_usage.completion_tokens or 0 }}</div>
           <div class="token-card__label">Completion Tokens</div>
         </div>
         <div class="token-card">
-          <div class="token-card__value">{{ data.token_usage.total_llm_calls | default(0) }}</div>
+          <div class="token-card__value">{{ data.token_usage.total_llm_calls or 0 }}</div>
           <div class="token-card__label">LLM Calls</div>
         </div>
         <div class="token-card">
-          <div class="token-card__value">{{ data.token_usage.overall_api_latency_sec | default(0) }}s</div>
+          <div class="token-card__value">{{ data.token_usage.total_llm_latency_sec or data.token_usage.overall_api_latency_sec or 0 }}s</div>
           <div class="token-card__label">Total Latency</div>
         </div>
       </div>

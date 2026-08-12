@@ -1,16 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   generateReport,
-  generatePromptSqlInjectionReport,
   generatePromptSqlInjectionReportStream,
+  generateVulnerabilityReportStream,
   getFeatureReports,
   downloadReportPdf,
   downloadReportHtml,
   downloadReportExcel,
+  downloadVulnerabilityExcel,
   getReport,
 } from '../services/api';
 import { formatDateTime } from '../utils/helpers';
 import PromptSqlInjectionForm from './PromptSqlInjectionForm';
+import VulnerabilityDiscoveryForm from './VulnerabilityDiscoveryForm';
 import '../styles/ReportModal.css';
 
 const CloseIcon = () => (
@@ -36,7 +38,7 @@ const ExcelIcon = () => (
   </svg>
 );
 
-const COMING_SOON_FEATURES = ['threat-model', 'vulnerability-discovery', 'hallucination-checks'];
+const COMING_SOON_FEATURES = ['threat-model', 'hallucination-checks'];
 
 export default function ReportModal({ feature, onClose }) {
   const [loading, setLoading] = useState(false);
@@ -54,6 +56,7 @@ export default function ReportModal({ feature, onClose }) {
   const iframeRef = useRef(null);
 
   const isPromptSqlInjection = feature.id === 'prompt-sql-injection';
+  const isVulnerabilityDiscovery = feature.id === 'vulnerability-discovery';
   const isComingSoon = COMING_SOON_FEATURES.includes(feature.id);
 
   // Load past reports on mount
@@ -140,6 +143,45 @@ export default function ReportModal({ feature, onClose }) {
     }
   }
 
+  async function handleVulnerabilityDiscoverySubmit(formData) {
+    setLoading(true);
+    setError(null);
+    setProgressState({
+      message: 'Scanning target codebase via Azure OpenAI SAST engine...',
+      percent: 10,
+      completedTests: [],
+      activeTest: null,
+    });
+
+    try {
+      const data = await generateVulnerabilityReportStream(formData, (evt) => {
+        setProgressState((prev) => {
+          const nextCompleted = [...prev.completedTests];
+          if (evt.extra?.file && !nextCompleted.some((t) => t.id === evt.extra.file)) {
+            nextCompleted.push({
+              id: evt.extra.file,
+              prompt: `${evt.extra.count} issue(s) detected`,
+            });
+          }
+          return {
+            message: evt.message || 'Scanning files for vulnerabilities...',
+            percent: evt.percent || prev.percent,
+            completedTests: nextCompleted,
+            activeTest: evt.extra?.file || prev.activeTest,
+          };
+        });
+      });
+
+      setCurrentReport(data);
+      loadPastReports();
+    } catch (err) {
+      setError('Failed to run Vulnerability Scan. Ensure backend is running.');
+      console.error('Vulnerability Scan Error:', err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function handleViewPastReport(reportId) {
     setLoading(true);
     setLoadingStatus('Loading report...');
@@ -160,17 +202,14 @@ export default function ReportModal({ feature, onClose }) {
     if (currentReport?.report_id) {
       const success = await downloadReportPdf(currentReport.report_id);
       if (!success) {
-        // Client-side fallback: print from iframe
         handleClientSidePrint();
       }
     } else {
-      // No report_id (local report), use client-side print
       handleClientSidePrint();
     }
   }
 
   function handleClientSidePrint() {
-    // Use the HTML content directly for print
     if (currentReport?.html_content) {
       const printWindow = window.open('', '_blank', 'width=900,height=700');
       if (printWindow) {
@@ -189,7 +228,6 @@ export default function ReportModal({ feature, onClose }) {
     if (currentReport?.report_id) {
       downloadReportHtml(currentReport.report_id);
     } else if (currentReport?.html_content) {
-      // Fallback: download from current html_content
       const blob = new Blob([currentReport.html_content], { type: 'text/html' });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -204,7 +242,11 @@ export default function ReportModal({ feature, onClose }) {
 
   function handleDownloadExcel() {
     if (currentReport?.report_id) {
-      downloadReportExcel(currentReport.report_id);
+      if (isVulnerabilityDiscovery) {
+        downloadVulnerabilityExcel(currentReport.report_id);
+      } else {
+        downloadReportExcel(currentReport.report_id);
+      }
     }
   }
 
@@ -270,11 +312,11 @@ export default function ReportModal({ feature, onClose }) {
                 <strong>{progressState.percent}%</strong>
               </div>
 
-              {/* Live Test Case Execution Tracker */}
+              {/* Live Progress Tracker */}
               {progressState.completedTests.length > 0 && (
                 <div className="report-modal__test-tracker">
                   <h4 className="report-modal__test-tracker-title">
-                    ⚡ Live Red-Team Test Case Progress ({progressState.completedTests.length} Executed)
+                    ⚡ Live Scan Progress ({progressState.completedTests.length} Item(s) Processed)
                   </h4>
                   <ul className="report-modal__test-tracker-list">
                     {progressState.completedTests.map((t) => (
@@ -314,6 +356,14 @@ export default function ReportModal({ feature, onClose }) {
             />
           )}
 
+          {/* Vulnerability Discovery Input Form */}
+          {!loading && !currentReport && isVulnerabilityDiscovery && (
+            <VulnerabilityDiscoveryForm
+              onSubmit={handleVulnerabilityDiscoverySubmit}
+              loading={loading}
+            />
+          )}
+
           {/* Report Content */}
           {!loading && currentReport && (
             <div className="report-modal__content">
@@ -327,7 +377,7 @@ export default function ReportModal({ feature, onClose }) {
             </div>
           )}
 
-          {/* Past Reports (only for non-coming-soon features) */}
+          {/* Past Reports */}
           {!isComingSoon && (
             <div className="report-modal__past">
               <h3 className="report-modal__past-title">Past Reports</h3>
@@ -353,7 +403,7 @@ export default function ReportModal({ feature, onClose }) {
           )}
         </div>
 
-        {/* Footer (only when report is shown) */}
+        {/* Footer */}
         {currentReport && (
           <div className="report-modal__footer">
             <button
@@ -363,13 +413,13 @@ export default function ReportModal({ feature, onClose }) {
               ← Back to Inputs
             </button>
 
-            {isPromptSqlInjection && (
+            {(isPromptSqlInjection || isVulnerabilityDiscovery) && (
               <button
                 className="btn btn-secondary report-modal__download-btn"
                 onClick={handleDownloadExcel}
                 style={{ borderColor: '#16a34a', color: '#16a34a' }}
               >
-                <ExcelIcon /> Excel (ATE_Report.xlsx)
+                <ExcelIcon /> Excel ({isVulnerabilityDiscovery ? 'vulnerabilities_UFO.xlsx' : 'ATE_Report.xlsx'})
               </button>
             )}
 

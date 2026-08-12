@@ -43,6 +43,37 @@ def get_active_usage_context() -> Optional[Dict[str, Any]]:
     return getattr(_thread_local, "active_context", None) or _global_active_context
 
 
+def _accumulate_usage(
+    usage_context: Dict[str, Any],
+    *,
+    model: str = "gpt-5.4",
+    prompt_tokens: int = 0,
+    completion_tokens: int = 0,
+    total_tokens: int = 0,
+    latency_sec: float = 0.0,
+    usage_lock: Optional[Any] = None,
+    **kwargs
+) -> None:
+    """Add one LLM call's usage into the shared usage context."""
+    if not usage_context or not isinstance(usage_context, dict):
+        return
+
+    fake_response = {
+        "usage": {
+            "prompt_tokens": prompt_tokens,
+            "completion_tokens": completion_tokens,
+            "total_tokens": total_tokens or (prompt_tokens + completion_tokens),
+        }
+    }
+    accumulate_usage_sync(
+        usage_context=usage_context,
+        model=model,
+        response=fake_response,
+        latency_sec=latency_sec,
+        usage_lock=usage_lock,
+    )
+
+
 def accumulate_usage_sync(
     usage_context: Optional[Dict[str, Any]] = None,
     model: str = "gpt-5.4",

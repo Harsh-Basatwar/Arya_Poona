@@ -46,7 +46,7 @@ const ArrowIcon = () => (
   </svg>
 );
 
-const COMING_SOON_IDS = ['threat-model', 'vulnerability-discovery', 'hallucination-checks'];
+const COMING_SOON_IDS = ['threat-model', 'hallucination-checks'];
 
 export default function FeatureCard({ feature, onClick }) {
   const isComingSoon = COMING_SOON_IDS.includes(feature.id);

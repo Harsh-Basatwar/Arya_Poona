@@ -22,6 +22,10 @@ def _random_score():
 
 
 def _risk_level(score):
+    try:
+        score = float(score)
+    except (TypeError, ValueError):
+        return 'Medium'
     if score >= 7.5:
         return 'Critical'
     elif score >= 5.0:
